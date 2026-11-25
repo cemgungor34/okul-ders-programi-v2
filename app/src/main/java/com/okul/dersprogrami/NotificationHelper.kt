@@ -144,8 +144,7 @@ object NotificationHelper {
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("👉 $className — $subjectName ($badgeText)")
             .setContentText(timeInfo)
-            .setStyle(NotificationCompat.BigTextStyle().bigText("$className • $subjectName
-$timeInfo"))
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$className • $subjectName - $timeInfo"))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -161,7 +160,6 @@ $timeInfo"))
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notifId, builder.build())
 
-        // Ekran kilitliyse doğrudan Tam Ekran Uyarıyı da aç
         if (useFullScreen) {
             try {
                 context.startActivity(fullScreenIntent)
