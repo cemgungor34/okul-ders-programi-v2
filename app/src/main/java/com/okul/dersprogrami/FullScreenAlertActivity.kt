@@ -1,6 +1,5 @@
 package com.okul.dersprogrami
 
-import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Color
@@ -27,22 +26,21 @@ class FullScreenAlertActivity : AppCompatActivity() {
     private val autoStopHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Kilit ekranının üzerinde açıl ve ekranı uyandır
+        // Kilit açma deseni istemeden doğrudan kilit ekranının üzerinde açıl
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
-            val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            km.requestDismissKeyguard(this, null)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            )
         }
+
+        @Suppress("DEPRECATION")
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        )
+
+        super.onCreate(savedInstanceState)
 
         val className = intent.getStringExtra("class_name") ?: "DERS SAATİ"
         val subjectName = intent.getStringExtra("subject_name") ?: ""
@@ -51,14 +49,12 @@ class FullScreenAlertActivity : AppCompatActivity() {
         val soundType = intent.getStringExtra("sound_type") ?: "school_bell"
         val notifId = intent.getIntExtra("notif_id", -1)
 
-        // Melodiyi başlat ve titreşim ver
         NotificationHelper.playSelectedMelody(this, soundType, loop = (soundType == "system_alarm"))
         startVibration()
 
         // 45 saniye sonra dokunulmazsa otomatik sustur
         autoStopHandler.postDelayed({ dismissAlert(notifId) }, 45_000L)
 
-        // Modern Tam Ekran Arayüzü (Kod ile saf ve yüksek kontrastlı tasarım)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
@@ -91,7 +87,6 @@ class FullScreenAlertActivity : AppCompatActivity() {
             setPadding(0, 48, 0, 8)
         }
 
-        // DEVASA SINIF KARTI (Örn: 6/A)
         val classCard = TextView(this).apply {
             text = className
             setTextColor(Color.WHITE)
