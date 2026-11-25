@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e1b4b">
+<title>Okul Ders Programı - Öğretmen Asistanı</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --primary: #4f46e5;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-main);
+    padding: 12px 12px 42px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .welcome-card {
+    display: none;
+    background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+    border: 2px solid #818cf8;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.14);
+  }
+
+  .welcome-card.open { display: block; }
+  .welcome-card h2 { font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px; }
+  .welcome-card p { font-size: 0.88rem; color: #475569; margin-bottom: 14px; line-height: 1.45; }
+
+  .welcome-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .welcome-form select {
+    flex: 1 1 240px;
+    padding: 11px 12px;
+    border-radius: 11px;
+    border: 2px solid #cbd5e1;
+    font-size: 0.92rem;
+    font-weight: 700;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  .live-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 24px -6px rgba(49, 46, 129, 0.35);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .live-banner.state-active {
+    background: linear-gradient(135deg, #064e3b 0%, #047857 60%, #10b981 100%);
+    box-shadow: 0 10px 24px -6px rgba(4, 120, 87, 0.35);
+  }
+
+  .live-banner.state-break {
+    background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%);
+    box-shadow: 0 10px 24px -6px rgba(194, 65, 12, 0.35);
+  }
+
+  .live-banner.state-free {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    box-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.25);
+  }
+
+  .live-left { flex: 1 1 260px; }
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  }
+
+  .live-main-text { font-size: 1.62rem; font-weight: 800; line-height: 1.22; }
+  .live-sub-text { font-size: 0.92rem; color: rgba(255, 255, 255, 0.92); margin-top: 6px; font-weight: 500; }
+
+  .live-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .clock-box {
+    background: rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 8px 14px;
+    border-radius: 12px;
+    text-align: right;
+  }
+
+  .live-clock { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .live-date { font-size: 0.76rem; color: rgba(255, 255, 255, 0.85); }
+
+  .banner-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    padding: 7px 11px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-glass.notif-on {
+    background: rgba(16, 185, 129, 0.38);
+    border-color: #6ee7b7;
+  }
+
+  .panel-box {
+    display: none;
+    background: var(--card-bg);
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+
+  .panel-box.open { display: block; }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background: #f8fafc;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: 10px;
+    font-size: 0.83rem;
+  }
+
+  .settings-row select {
+    padding: 6px 8px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
+    background: #fff;
+    max-width: 100%;
+  }
+
+  .bell-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .bell-item {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .bell-item label { display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px; }
+  .bell-inputs { display: flex; align-items: center; gap: 4px; }
+  .bell-inputs input[type="time"] { width: 100%; padding: 5px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: var(--card-bg);
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+
+  .filters, .tool-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+  button.btn {
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    color: var(--text-main);
+    padding: 7px 11px;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button.btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  button.btn-edit-mode { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+  button.btn-edit-mode.editing { background: #16a34a; color: #fff; border-color: #16a34a; }
+  button.btn-save { background: #16a34a; color: #fff; border-color: #16a34a; }
+  button.btn-reset { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+  button.btn-test-full { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+
+  .edit-hint-bar {
+    display: none;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #78350f;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .edit-hint-bar.open { display: flex; }
+
+  .table-wrapper {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    overflow-x: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 800px; }
+
+  th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.86rem;
+    padding: 10px 6px;
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  th small { display: block; font-size: 0.7rem; font-weight: 600; color: #64748b; }
+  th:first-child { width: 115px; background: #f1f5f9; }
+  th:last-child, td:last-child { border-right: none; }
+  tr { border-bottom: 1px solid var(--border); }
+  tr:last-child { border-bottom: none; }
+
+  td.day-cell { font-weight: 700; font-size: 0.92rem; background: #f8fafc; padding: 12px 10px; border-right: 2px solid var(--border); }
+  td.day-cell.today { background: #eef2ff; color: #4338ca; border-left: 5px solid #4f46e5; }
+  .today-tag { display: inline-block; font-size: 0.65rem; background: #4f46e5; color: #fff; padding: 2px 5px; border-radius: 4px; margin-top: 3px; }
+
+  td.slot { padding: 6px; border-right: 1px solid var(--border); height: 84px; width: calc((100% - 115px) / 7); }
+
+  .empty-slot {
+    height: 100%;
+    border-radius: 9px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.74rem;
+  }
+
+  body.edit-active .empty-slot {
+    cursor: pointer;
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+    font-weight: 700;
+  }
+
+  .lesson-card {
+    height: 100%;
+    border-radius: 10px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    border-left: 5px solid transparent;
+  }
+
+  body.edit-active .lesson-card { outline: 2px dashed #f59e0b; }
+  .lesson-card.now-active { outline: 3px solid #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25); z-index: 3; }
+  .lesson-card.now-next { outline: 3px dashed #f97316; z-index: 2; }
+
+  .status-badge {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 999px;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .badge-now { background: #059669; }
+  .badge-next { background: #ea580c; }
+  .lesson-card.dimmed { opacity: 0.22; }
+  .lesson-card.done { opacity: 0.55; text-decoration: line-through; }
+
+  .lesson-card.done::after {
+    content: "✓";
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    background: #16a34a;
+    color: #fff;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.68rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .class-name { font-size: 1.04rem; font-weight: 800; }
+  .subject-name { font-size: 0.68rem; font-weight: 700; margin-top: 2px; opacity: 0.88; line-height: 1.15; }
+
+  .grade-5 { background: #fff7ed; color: #9a3412; border-left-color: #f97316; }
+  .grade-6 { background: #eff6ff; color: #1e40af; border-left-color: #3b82f6; }
+  .grade-7 { background: #ecfdf5; color: #065f46; border-left-color: #10b981; }
+  .grade-8 { background: #f5f3ff; color: #5b21b6; border-left-color: #8b5cf6; }
+  .grade-other { background: #f1f5f9; color: #1e293b; border-left-color: #475569; }
+
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 35px rgba(0,0,0,0.22);
+  }
+
+  .modal-card h4 { font-size: 1.08rem; margin-bottom: 14px; color: #0f172a; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 5px; }
+  .class-picker-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .modal-card select, .modal-card input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  .modal-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 16px; }
+
+  @media (max-width: 640px) {
+    .live-main-text { font-size: 1.4rem; }
+    .live-right { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+    .clock-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="welcome-card" class="welcome-card">
+    <h2>👋 Hoş Geldiniz! Ders Programınızı Hazırlayalım</h2>
+    <p>Öncelikle ana branşınızı seçin. Ardından <strong>✏️ Programı Düzenle</strong> butonuna dokunarak girdiğiniz sınıfları ekleyin; ders saati geldiğinde telefonunuz tam ekran uyarıyla hangi sınıfa gireceğinizi gösterecektir.</p>
+    <div class="welcome-form">
+      <select id="welcome-subject-select"></select>
+      <button class="btn btn-save" style="padding:11px 18px; font-size:0.92rem;" onclick="completeWelcomeSetup()">Başla ve Programı Gir →</button>
+    </div>
+  </div>
+
+  <div id="live-banner" class="live-banner">
+    <div class="live-left">
+      <div class="live-pill">
+        <span class="pulse-dot"></span>
+        <span id="live-status-label">KONTROL EDİLİYOR...</span>
+      </div>
+      <div class="live-main-text" id="live-main-text">Yükleniyor...</div>
+      <div class="live-sub-text" id="live-sub-text"></div>
+    </div>
+    <div class="live-right">
+      <div class="clock-box">
+        <div class="live-clock" id="live-clock">--:--:--</div>
+        <div class="live-date" id="live-date">---</div>
+      </div>
+      <div class="banner-btns">
+        <button id="btn-notif" class="btn-glass notif-on" onclick="handleNotifButton()">🔔 Uyarı Açık</button>
+        <button class="btn-glass" onclick="toggleBellPanel()">⏰ Zil & Ayar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bell-panel" class="panel-box">
+    <div class="panel-header">
+      <h3 style="font-size:1rem;">⚙️ Branş, Zil Melodisi ve Tam Ekran Uyarı Ayarları</h3>
+      <button class="btn btn-test-full" onclick="testFullScreenAlert()">📲 Tam Ekran Uyarıyı Test Et</button>
+    </div>
+
+    <div class="settings-row">
+      <label style="font-weight:700;">Varsayılan Branşım:</label>
+      <select id="default-subject-select" onchange="saveDefaultSubject()"></select>
+    </div>
+
+    <div class="settings-row">
+      <label style="font-weight:700;">Zil Melodisi:</label>
+      <select id="sound-type" onchange="saveNotifPrefs()">
+        <option value="school_bell">🎵 Uzun Okul Zili Melodisi (4.5 sn - Önerilen)</option>
+        <option value="system_alarm">⏰ Telefonun Çalar Saat Sesi (Sürekli)</option>
+        <option value="system_ringtone">📞 Telefon Zil Sesi</option>
+        <option value="system_notif">🔔 Kısa Bildirim Sesi</option>
+      </select>
+      <button class="btn" onclick="previewBellSound()">▶️ Sesi Dinle</button>
+    </div>
+
+    <div class="settings-row">
+      <label style="font-weight:700;">Uyarı Zamanı:</label>
+      <select id="notif-offset" onchange="saveNotifPrefs()">
+        <option value="0">Tam ders zili çaldığında (0 dk)</option>
+        <option value="2">Dersten 2 dakika önce</option>
+        <option value="3">Dersten 3 dakika önce</option>
+        <option value="5">Dersten 5 dakika önce</option>
+      </select>
+      <label style="display:inline-flex; align-items:center; gap:5px; font-weight:600; cursor:pointer;">
+        <input type="checkbox" id="fullscreen-alert-chk" checked onchange="saveNotifPrefs()"> Tam ekran uyarı aç
+      </label>
+    </div>
+
+    <div class="bell-grid" id="bell-grid"></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-reset" onclick="resetBellTimes()">Okul Zil Saatlerine Dön</button>
+      <button class="btn btn-save" onclick="saveBellTimes()">💾 Kaydet ve Alarmları Güncelle</button>
+    </div>
+  </div>
+
+  <div id="edit-hint-bar" class="edit-hint-bar">
+    <span>✏️ <strong>Düzenleme Modu:</strong> Ders eklemek/değiştirmek için kutulara dokunun. Kaydettiğiniz anda alarmlar ve ana ekran widget'ı otomatik güncellenir.</span>
+    <button class="btn btn-reset" onclick="clearAllSchedule()">🗑️ Tüm Tabloyu Temizle</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <button class="btn active" onclick="filterGrade('all', this)">Tümü</button>
+      <button class="btn" onclick="filterGrade('5', this)">5. Sınıf</button>
+      <button class="btn" onclick="filterGrade('6', this)">6. Sınıf</button>
+      <button class="btn" onclick="filterGrade('7', this)">7. Sınıf</button>
+      <button class="btn" onclick="filterGrade('8', this)">8. Sınıf</button>
+    </div>
+    <div class="tool-actions">
+      <button id="btn-edit-mode" class="btn btn-edit-mode" onclick="toggleEditMode()">✏️ Programı Düzenle</button>
+      <button class="btn btn-reset" onclick="resetDone()">✓ İşaretleri Sıfırla</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead id="table-head"></thead>
+      <tbody id="schedule-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal-backdrop" onclick="if(event.target===this) closeEditModal()">
+  <div class="modal-card">
+    <h4 id="modal-title">Dersi Düzenle</h4>
+    <div class="form-group">
+      <label>Sınıf ve Şube Seçin (A – Z)</label>
+      <div class="class-picker-row">
+        <select id="modal-grade" onchange="toggleCustomClassInput()">
+          <option value="5">5. Sınıf</option>
+          <option value="6">6. Sınıf</option>
+          <option value="7">7. Sınıf</option>
+          <option value="8">8. Sınıf</option>
+          <option value="CUSTOM">Diğer / Özel</option>
+        </select>
+        <select id="modal-section"></select>
+      </div>
+      <input type="text" id="modal-custom-class" placeholder="Örn: DYK-8 veya KULÜP" style="display:none; margin-top:8px; text-transform:uppercase;">
+    </div>
+    <div class="form-group">
+      <label>Ders Adı</label>
+      <select id="modal-subject"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-reset" onclick="clearCurrentSlot()">🗑️ Boş Yap</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" onclick="closeEditModal()">İptal</button>
+        <button class="btn btn-save" onclick="saveSlotEdit()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const MIDDLE_SCHOOL_SUBJECTS = [
+    { full: "Türkçe", short: "TÜRKÇE" },
+    { full: "Matematik", short: "MATEMATİK" },
+    { full: "Fen Bilimleri", short: "FEN BİL." },
+    { full: "Sosyal Bilgiler", short: "SOSYAL BİL." },
+    { full: "T.C. İnkılap Tarihi ve Atatürkçülük", short: "İNKILAP TAR." },
+    { full: "Yabancı Dil", short: "YABANCI DİL" },
+    { full: "Din Kültürü ve Ahlak Bilgisi", short: "DİN KÜLTÜRÜ" },
+    { full: "Görsel Sanatlar", short: "GÖRSEL SAN." },
+    { full: "Müzik", short: "MÜZİK" },
+    { full: "Beden Eğitimi ve Oyun", short: "BEDEN EĞT. OYUN" },
+    { full: "Beden Eğitimi ve Spor", short: "BEDEN EĞT. SPOR" },
+    { full: "Teknoloji ve Tasarım", short: "TEKN. TASARIM" },
+    { full: "Bilişim Teknolojileri ve Yazılım", short: "BİLİŞİM" },
+    { full: "Seçmeli Ders / Kulüp / Rehberlik", short: "SEÇMELİ / KULÜP" }
+  ];
+
+  const officialBellTimes = [
+    { start: "08:40", end: "09:20" },
+    { start: "09:35", end: "10:15" },
+    { start: "10:35", end: "11:15" },
+    { start: "11:30", end: "12:10" },
+    { start: "13:10", end: "13:50" },
+    { start: "14:05", end: "14:45" },
+    { start: "15:00", end: "15:40" }
+  ];
+
+  const emptyScheduleTemplate = [
+    { day: "Pazartesi", dayIndex: 1, slots: [null, null, null, null, null, null, null] },
+    { day: "Salı",      dayIndex: 2, slots: [null, null, null, null, null, null, null] },
+    { day: "Çarşamba",  dayIndex: 3, slots: [null, null, null, null, null, null, null] },
+    { day: "Perşembe",  dayIndex: 4, slots: [null, null, null, null, null, null, null] },
+    { day: "Cuma",      dayIndex: 5, slots: [null, null, null, null, null, null, null] }
+  ];
+
+  const STORAGE_SCHEDULE = "okul_ders_programi_apk_v2";
+  const STORAGE_DONE     = "okul_ders_done_apk_v2";
+  const STORAGE_BELLS    = "okul_zil_saatleri_apk_v2";
+  const STORAGE_NOTIF    = "okul_notif_prefs_apk_v2";
+  const STORAGE_SUBJECT  = "okul_varsayilan_brans_apk_v2";
+
+  let scheduleData = JSON.parse(localStorage.getItem(STORAGE_SCHEDULE) || "null") || JSON.parse(JSON.stringify(emptyScheduleTemplate));
+  let doneSlots = JSON.parse(localStorage.getItem(STORAGE_DONE) || "{}");
+  let bellTimes = JSON.parse(localStorage.getItem(STORAGE_BELLS) || "null") || JSON.parse(JSON.stringify(officialBellTimes));
+  let notifPrefs = JSON.parse(localStorage.getItem(STORAGE_NOTIF) || '{"enabled":true,"offset":0,"soundType":"school_bell","fullScreen":true}');
+  let defaultSubject = localStorage.getItem(STORAGE_SUBJECT) || "";
+
+  let isEditMode = false;
+  let editingTarget = null;
+  let lastRenderedStateKey = "";
+
+  function syncAndroidNativeAlarms() {
+    const payload = JSON.stringify({
+      enabled: notifPrefs.enabled,
+      offset: Number(notifPrefs.offset || 0),
+      soundType: notifPrefs.soundType || "school_bell",
+      fullScreen: notifPrefs.fullScreen !== false,
+      bellTimes: bellTimes,
+      scheduleData: scheduleData
+    });
+
+    if (window.AndroidBridge && typeof window.AndroidBridge.syncAlarms === "function") {
+      window.AndroidBridge.syncAlarms(payload);
+    }
+  }
+
+  function previewBellSound() {
+    const st = document.getElementById("sound-type").value;
+    if (window.AndroidBridge && typeof window.AndroidBridge.previewSound === "function") {
+      window.AndroidBridge.previewSound(st);
+    }
+  }
+
+  function testFullScreenAlert() {
+    const sampleSubj = defaultSubject || "Bilişim Teknolojileri ve Yazılım";
+    const st = document.getElementById("sound-type").value;
+    if (window.AndroidBridge && typeof window.AndroidBridge.testFullScreenAlert === "function") {
+      window.AndroidBridge.testFullScreenAlert("6/A", sampleSubj, "1. Ders • 08:40 - 09:20", st);
+    } else {
+      alert("Tam Ekran Uyarı Testi: Android .APK içinde kilit ekranını uyandıran büyük sınıf kartını açar.");
+    }
+  }
+
+  function updateNotifButtonUI() {
+    const btn = document.getElementById("btn-notif");
+    if (notifPrefs.enabled) {
+      btn.textContent = "🔔 Uyarı Açık";
+      btn.classList.add("notif-on");
+    } else {
+      btn.textContent = "🔕 Uyarı Kapalı";
+      btn.classList.remove("notif-on");
+    }
+    document.getElementById("notif-offset").value = String(notifPrefs.offset || 0);
+    document.getElementById("sound-type").value = notifPrefs.soundType || "school_bell";
+    document.getElementById("fullscreen-alert-chk").checked = notifPrefs.fullScreen !== false;
+  }
+
+  function handleNotifButton() {
+    notifPrefs.enabled = !notifPrefs.enabled;
+    localStorage.setItem(STORAGE_NOTIF, JSON.stringify(notifPrefs));
+    updateNotifButtonUI();
+    syncAndroidNativeAlarms();
+  }
+
+  function saveNotifPrefs() {
+    notifPrefs.offset = Number(document.getElementById("notif-offset").value || 0);
+    notifPrefs.soundType = document.getElementById("sound-type").value || "school_bell";
+    notifPrefs.fullScreen = document.getElementById("fullscreen-alert-chk").checked;
+    localStorage.setItem(STORAGE_NOTIF, JSON.stringify(notifPrefs));
+    syncAndroidNativeAlarms();
+  }
+
+  function getShortSubject(fullName) {
+    const found = MIDDLE_SCHOOL_SUBJECTS.find(s => s.full === fullName);
+    return found ? found.short : (fullName || "DERS").toUpperCase();
+  }
+
+  function populateDropdowns() {
+    const selectIds = ["welcome-subject-select", "default-subject-select", "modal-subject"];
+    selectIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = MIDDLE_SCHOOL_SUBJECTS.map(s => `<option value="${s.full}">${s.full}</option>`).join("");
+    });
+
+    if (defaultSubject) {
+      document.getElementById("default-subject-select").value = defaultSubject;
+    }
+
+    const secSelect = document.getElementById("modal-section");
+    let secHtml = "";
+    for (let code = 65; code <= 90; code++) {
+      const letter = String.fromCharCode(code);
+      secHtml += `<option value="${letter}">${letter} Şubesi</option>`;
+    }
+    secSelect.innerHTML = secHtml;
+  }
+
+  function initWelcomeCheck() {
+    if (!defaultSubject) {
+      document.getElementById("welcome-card").classList.add("open");
+    }
+  }
+
+  function completeWelcomeSetup() {
+    const chosen = document.getElementById("welcome-subject-select").value;
+    defaultSubject = chosen;
+    localStorage.setItem(STORAGE_SUBJECT, defaultSubject);
+    document.getElementById("default-subject-select").value = defaultSubject;
+    document.getElementById("welcome-card").classList.remove("open");
+    if (!isEditMode) toggleEditMode();
+  }
+
+  function saveDefaultSubject() {
+    defaultSubject = document.getElementById("default-subject-select").value;
+    localStorage.setItem(STORAGE_SUBJECT, defaultSubject);
+  }
+
+  function timeToMinutes(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function formatRemaining(mins) {
+    if (mins <= 0) return "1 dakikadan az";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h} saat ${m} dk` : `${m} dakika`;
+  }
+
+  function renderBellSettings() {
+    const grid = document.getElementById("bell-grid");
+    grid.innerHTML = "";
+    bellTimes.forEach((b, i) => {
+      const div = document.createElement("div");
+      div.className = "bell-item";
+      div.innerHTML = `
+        <label>${i + 1}. Ders</label>
+        <div class="bell-inputs">
+          <input type="time" id="bell-start-${i}" value="${b.start}">
+          <span>-</span>
+          <input type="time" id="bell-end-${i}" value="${b.end}">
+        </div>
+      `;
+      grid.appendChild(div);
+    });
+  }
+
+  function toggleBellPanel() {
+    const panel = document.getElementById("bell-panel");
+    panel.classList.toggle("open");
+    if (panel.classList.contains("open")) {
+      renderBellSettings();
+      updateNotifButtonUI();
+    }
+  }
+
+  function saveBellTimes() {
+    const updated = [];
+    for (let i = 0; i < 7; i++) {
+      const s = document.getElementById(`bell-start-${i}`).value;
+      const e = document.getElementById(`bell-end-${i}`).value;
+      if (s && e) updated.push({ start: s, end: e });
+    }
+    if (updated.length === 7) {
+      bellTimes = updated;
+      localStorage.setItem(STORAGE_BELLS, JSON.stringify(bellTimes));
+      syncAndroidNativeAlarms();
+      lastRenderedStateKey = "";
+      updateLiveStatus();
+      document.getElementById("bell-panel").classList.remove("open");
+    }
+  }
+
+  function resetBellTimes() {
+    bellTimes = JSON.parse(JSON.stringify(officialBellTimes));
+    localStorage.removeItem(STORAGE_BELLS);
+    renderBellSettings();
+    syncAndroidNativeAlarms();
+    lastRenderedStateKey = "";
+    updateLiveStatus();
+  }
+
+  function toggleEditMode() {
+    isEditMode = !isEditMode;
+    document.body.classList.toggle("edit-active", isEditMode);
+    const btn = document.getElementById("btn-edit-mode");
+    const bar = document.getElementById("edit-hint-bar");
+    if (isEditMode) {
+      btn.textContent = "✓ Düzenlemeyi Bitir";
+      btn.classList.add("editing");
+      bar.classList.add("open");
+    } else {
+      btn.textContent = "✏️ Programı Düzenle";
+      btn.classList.remove("editing");
+      bar.classList.remove("open");
+    }
+  }
+
+  function toggleCustomClassInput() {
+    const gradeVal = document.getElementById("modal-grade").value;
+    const secEl = document.getElementById("modal-section");
+    const customEl = document.getElementById("modal-custom-class");
+    if (gradeVal === "CUSTOM") {
+      secEl.style.display = "none";
+      customEl.style.display = "block";
+    } else {
+      secEl.style.display = "block";
+      customEl.style.display = "none";
+    }
+  }
+
+  function openEditModal(dayRowIdx, slotIdx) {
+    editingTarget = { dayRowIdx, slotIdx };
+    const row = scheduleData[dayRowIdx];
+    const existing = row.slots[slotIdx];
+
+    document.getElementById("modal-title").textContent = `${row.day} • ${slotIdx + 1}. Ders (${bellTimes[slotIdx].start})`;
+
+    const gradeEl = document.getElementById("modal-grade");
+    const secEl = document.getElementById("modal-section");
+    const customEl = document.getElementById("modal-custom-class");
+    const subjEl = document.getElementById("modal-subject");
+
+    if (existing && existing.cls) {
+      const match = existing.cls.match(/^([5-8])\/([A-Z])$/);
+      if (match) {
+        gradeEl.value = match[1];
+        secEl.value = match[2];
+        customEl.value = "";
+      } else {
+        gradeEl.value = "CUSTOM";
+        customEl.value = existing.cls;
+      }
+      subjEl.value = existing.subject || defaultSubject || MIDDLE_SCHOOL_SUBJECTS[0].full;
+    } else {
+      gradeEl.value = "6";
+      secEl.value = "A";
+      customEl.value = "";
+      subjEl.value = defaultSubject || MIDDLE_SCHOOL_SUBJECTS[0].full;
+    }
+
+    toggleCustomClassInput();
+    document.getElementById("edit-modal").classList.add("open");
+  }
+
+  function closeEditModal() {
+    document.getElementById("edit-modal").classList.remove("open");
+    editingTarget = null;
+  }
+
+  function saveSlotEdit() {
+    if (!editingTarget) return;
+    const gradeVal = document.getElementById("modal-grade").value;
+    const secVal = document.getElementById("modal-section").value;
+    const customVal = document.getElementById("modal-custom-class").value.trim().toUpperCase();
+    const subjVal = document.getElementById("modal-subject").value;
+
+    const finalClass = gradeVal === "CUSTOM" ? customVal : `${gradeVal}/${secVal}`;
+
+    if (!finalClass) {
+      scheduleData[editingTarget.dayRowIdx].slots[editingTarget.slotIdx] = null;
+    } else {
+      scheduleData[editingTarget.dayRowIdx].slots[editingTarget.slotIdx] = {
+        cls: finalClass,
+        subject: subjVal
+      };
+    }
+
+    if (!defaultSubject) {
+      defaultSubject = subjVal;
+      localStorage.setItem(STORAGE_SUBJECT, defaultSubject);
+      document.getElementById("default-subject-select").value = defaultSubject;
+      document.getElementById("welcome-card").classList.remove("open");
+    }
+
+    localStorage.setItem(STORAGE_SCHEDULE, JSON.stringify(scheduleData));
+    syncAndroidNativeAlarms();
+    closeEditModal();
+    lastRenderedStateKey = "";
+    updateLiveStatus();
+  }
+
+  function clearCurrentSlot() {
+    if (!editingTarget) return;
+    scheduleData[editingTarget.dayRowIdx].slots[editingTarget.slotIdx] = null;
+    localStorage.setItem(STORAGE_SCHEDULE, JSON.stringify(scheduleData));
+    syncAndroidNativeAlarms();
+    closeEditModal();
+    lastRenderedStateKey = "";
+    updateLiveStatus();
+  }
+
+  function clearAllSchedule() {
+    if (confirm("Tablodaki tüm dersler ve kurulu alarmlar silinsin mi?")) {
+      scheduleData = JSON.parse(JSON.stringify(emptyScheduleTemplate));
+      localStorage.setItem(STORAGE_SCHEDULE, JSON.stringify(scheduleData));
+      syncAndroidNativeAlarms();
+      lastRenderedStateKey = "";
+      updateLiveStatus();
+    }
+  }
+
+  function getGradeColorClass(cls) {
+    const first = cls.trim()[0];
+    if (["5", "6", "7", "8"].includes(first)) return `grade-${first}`;
+    return "grade-other";
+  }
+
+  function evaluateCurrentState(now) {
+    const jsDay = now.getDay();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const todayRow = scheduleData.find(d => d.dayIndex === jsDay);
+    const hasAnyLessonInWeek = scheduleData.some(r => r.slots.some(s => s !== null));
+
+    if (!hasAnyLessonInWeek) {
+      return {
+        bannerClass: "state-free",
+        pill: "PROGRAM HENÜZ BOŞ",
+        main: "Ders Programınızı Ekleyin ✏️",
+        sub: "Aşağıdaki 'Programı Düzenle' butonuna dokunarak sınıflarınızı girin.",
+        activeSlotIndex: -1,
+        nextSlotIndex: -1,
+        todayIndex: jsDay
+      };
+    }
+
+    if (!todayRow) {
+      return {
+        bannerClass: "state-free",
+        pill: "HAFTA SONU",
+        main: "Bugün Ders Yok 🎉",
+        sub: "İyi tatiller!",
+        activeSlotIndex: -1,
+        nextSlotIndex: -1,
+        todayIndex: jsDay
+      };
+    }
+
+    if (!todayRow.slots.some(s => s !== null)) {
+      return {
+        bannerClass: "state-free",
+        pill: `${todayRow.day.toUpperCase()} • BOŞ GÜN`,
+        main: "Bugün Hiç Dersiniz Yok ☕",
+        sub: `${todayRow.day} günü programınız tamamen boş.`,
+        activeSlotIndex: -1,
+        nextSlotIndex: -1,
+        todayIndex: jsDay
+      };
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const startM = timeToMinutes(bellTimes[i].start);
+      const endM = timeToMinutes(bellTimes[i].end);
+      if (nowMins >= startM && nowMins < endM) {
+        const slot = todayRow.slots[i];
+        const rem = endM - nowMins;
+        let nextInfo = "Bugün başka dersiniz kalmadı.";
+        let nextIdx = -1;
+        for (let j = i + 1; j < 7; j++) {
+          if (todayRow.slots[j]) {
+            nextInfo = `Sonraki: ${j + 1}. Ders (${bellTimes[j].start}) → ${todayRow.slots[j].cls}`;
+            nextIdx = j;
+            break;
+          }
+        }
+        if (slot) {
+          return {
+            bannerClass: "state-active",
+            pill: `ŞU AN ${i + 1}. DERS (${bellTimes[i].start} - ${bellTimes[i].end})`,
+            main: `👉 ${slot.cls} — ${slot.subject}`,
+            sub: `Zile ${formatRemaining(rem)} kaldı • ${nextInfo}`,
+            activeSlotIndex: i,
+            nextSlotIndex: nextIdx,
+            todayIndex: jsDay
+          };
+        } else {
+          return {
+            bannerClass: "state-free",
+            pill: `ŞU AN ${i + 1}. DERS SAATİ`,
+            main: "Bu Ders Saati Boş ☕",
+            sub: `Bitime ${formatRemaining(rem)} var • ${nextInfo}`,
+            activeSlotIndex: i,
+            nextSlotIndex: nextIdx,
+            todayIndex: jsDay
+          };
+        }
+      }
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const startM = timeToMinutes(bellTimes[i].start);
+      if (nowMins < startM) {
+        const waitMins = startM - nowMins;
+        const slot = todayRow.slots[i];
+        let nextFilledIdx = -1;
+        for (let j = i; j < 7; j++) {
+          if (todayRow.slots[j]) { nextFilledIdx = j; break; }
+        }
+        if (slot) {
+          return {
+            bannerClass: "state-break",
+            pill: i === 0 ? "GÜN BAŞLIYOR" : "TENEFFÜS / ARA",
+            main: `Sıradaki Sınıf: ${slot.cls} — ${slot.subject}`,
+            sub: `${i + 1}. Ders (${bellTimes[i].start}) ziline ${formatRemaining(waitMins)} kaldı`,
+            activeSlotIndex: -1,
+            nextSlotIndex: i,
+            todayIndex: jsDay
+          };
+        } else if (nextFilledIdx !== -1) {
+          const nextSlot = todayRow.slots[nextFilledIdx];
+          const nextStart = bellTimes[nextFilledIdx].start;
+          const totalWait = timeToMinutes(nextStart) - nowMins;
+          return {
+            bannerClass: "state-break",
+            pill: `${i + 1}. DERSİNİZ BOŞ`,
+            main: `Sıradaki Dolu Ders: ${nextSlot.cls} (${nextFilledIdx + 1}. Ders)`,
+            sub: `${nextSlot.subject} • Saat ${nextStart}'da (${formatRemaining(totalWait)} sonra)`,
+            activeSlotIndex: -1,
+            nextSlotIndex: nextFilledIdx,
+            todayIndex: jsDay
+          };
+        }
+      }
+    }
+
+    return {
+      bannerClass: "state-free",
+      pill: "DERSLER TAMAMLANDI",
+      main: "Bugünkü Tüm Dersler Bitti 🎉",
+      sub: "İyi dinlenmeler!",
+      activeSlotIndex: -1,
+      nextSlotIndex: -1,
+      todayIndex: jsDay
+    };
+  }
+
+  function renderTable(state) {
+    document.getElementById("table-head").innerHTML = `
+      <tr>
+        <th>Günler</th>
+        ${bellTimes.map((b, idx) => `<th>${idx + 1}. Ders<small>${b.start}–${b.end}</small></th>`).join("")}
+      </tr>
+    `;
+
+    const tbody = document.getElementById("schedule-body");
+    tbody.innerHTML = "";
+
+    scheduleData.forEach((row, dayRowIdx) => {
+      const tr = document.createElement("tr");
+      const isToday = row.dayIndex === state.todayIndex;
+
+      const dayTd = document.createElement("td");
+      dayTd.className = "day-cell" + (isToday ? " today" : "");
+      dayTd.innerHTML = row.day + (isToday ? '<br><span class="today-tag">BUGÜN</span>' : "");
+      tr.appendChild(dayTd);
+
+      row.slots.forEach((slot, idx) => {
+        const td = document.createElement("td");
+        td.className = "slot";
+        if (!slot) {
+          const emptyDiv = document.createElement("div");
+          emptyDiv.className = "empty-slot";
+          emptyDiv.textContent = isEditMode ? "+ Ekle" : "Boş";
+          emptyDiv.addEventListener("click", () => {
+            if (isEditMode) openEditModal(dayRowIdx, idx);
+          });
+          td.appendChild(emptyDiv);
+        } else {
+          const slotId = `${row.day}-${idx + 1}`;
+          const grade = slot.cls.split("/")[0];
+          const isDone = !!doneSlots[slotId];
+          const isNow = isToday && state.activeSlotIndex === idx;
+          const isNext = isToday && state.nextSlotIndex === idx && !isNow;
+
+          const card = document.createElement("div");
+          card.className = `lesson-card ${getGradeColorClass(slot.cls)}` + (isDone ? " done" : "") + (isNow ? " now-active" : "") + (isNext ? " now-next" : "");
+          card.dataset.grade = grade;
+
+          let badgeHtml = "";
+          if (isNow) badgeHtml = '<span class="status-badge badge-now">ŞU AN</span>';
+          else if (isNext) badgeHtml = '<span class="status-badge badge-next">SIRADAKİ</span>';
+
+          card.innerHTML = `${badgeHtml}<span class="class-name">${slot.cls}</span><span class="subject-name">${getShortSubject(slot.subject)}</span>`;
+          card.addEventListener("click", () => {
+            if (isEditMode) {
+              openEditModal(dayRowIdx, idx);
+              return;
+            }
+            if (doneSlots[slotId]) { delete doneSlots[slotId]; card.classList.remove("done"); }
+            else { doneSlots[slotId] = true; card.classList.add("done"); }
+            localStorage.setItem(STORAGE_DONE, JSON.stringify(doneSlots));
+          });
+          td.appendChild(card);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateLiveStatus() {
+    const now = new Date();
+    const daysTr = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    const monthsTr = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+    document.getElementById("live-clock").textContent = now.toTimeString().slice(0, 8);
+    document.getElementById("live-date").textContent = `${now.getDate()} ${monthsTr[now.getMonth()]} • ${daysTr[now.getDay()]}`;
+
+    const state = evaluateCurrentState(now);
+    document.getElementById("live-banner").className = `live-banner ${state.bannerClass}`;
+    document.getElementById("live-status-label").textContent = state.pill;
+    document.getElementById("live-main-text").textContent = state.main;
+    document.getElementById("live-sub-text").textContent = state.sub;
+
+    const stateKey = `${state.todayIndex}-${state.activeSlotIndex}-${state.nextSlotIndex}-${isEditMode}-${JSON.stringify(bellTimes)}-${JSON.stringify(scheduleData)}`;
+    if (stateKey !== lastRenderedStateKey) {
+      lastRenderedStateKey = stateKey;
+      renderTable(state);
+    }
+  }
+
+  function resetDone() {
+    doneSlots = {};
+    localStorage.removeItem(STORAGE_DONE);
+    document.querySelectorAll(".lesson-card.done").forEach(el => el.classList.remove("done"));
+  }
+
+  function filterGrade(grade, btnEl) {
+    document.querySelectorAll(".filters .btn").forEach(b => b.classList.remove("active"));
+    btnEl.classList.add("active");
+    document.querySelectorAll(".lesson-card").forEach(card => {
+      card.classList.toggle("dimmed", grade !== "all" && card.dataset.grade !== grade);
+    });
+  }
+
+  populateDropdowns();
+  initWelcomeCheck();
+  updateNotifButtonUI();
+  updateLiveStatus();
+  syncAndroidNativeAlarms();
+  setInterval(updateLiveStatus, 1000);
+</script>
+</body>
+</html>
